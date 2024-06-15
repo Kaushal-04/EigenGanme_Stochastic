@@ -3,18 +3,32 @@
 
 using namespace std;
 using namespace Eigen;
-
+#define MAX_SIZE 10000
+int n;
+void setValueOfn(){
+    cout<<"Enter order of matrix:";
+    cin>>n;
+    if (n > MAX_SIZE) {
+        cout << "Error: Order exceeds maximum size. Setting order to maximum size.\n";
+        n = MAX_SIZE;
+    }
+}
+MatrixXf makeSymmetric(const MatrixXf& A) {
+    return 0.5 * (A + A.transpose());
+}
 int main() {
-    int n= 3;
+     setValueOfn();
     // Equation Ax = nBx
-    MatrixXf A(n, n);
-    A << 1, 2, 3,
-         4, 5, 6,
-         7, 8, 9;
-    MatrixXf B(n, n);
-    B << 9, 8, 7,
-         6, 5, 4,
-         3, 2, 1;
+    MatrixXf randomMatrixA , randomMatrixB;
+    randomMatrixA.setRandom(n,n);
+    randomMatrixA = randomMatrixA.array().abs(); // Ensure positive values
+    randomMatrixB.setRandom(n,n);
+    randomMatrixB = randomMatrixB.array().abs(); // Ensure positive values
+    MatrixXf A = makeSymmetric(randomMatrixA);
+    MatrixXf B = makeSymmetric(randomMatrixB);
+          // Eigenvalue and Eigenvector Computation: The GeneralizedEigenSolver class in Eigen is used
+          // to solve the generalized eigenvalue problem Ax=λBx. The .compute(A, B) method computes the 
+          // eigenvalues and eigenvectors.
     GeneralizedEigenSolver<MatrixXf> ges;
     ges.compute(A, B);
     MatrixXf eigenvalues = ges.eigenvalues().real();
