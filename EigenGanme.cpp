@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Eigen/Dense>
-
+#include <algorithm>
 using namespace std;
 using namespace Eigen;
 #define MAX_SIZE 10000
@@ -42,6 +42,12 @@ void deleteColumn(MatrixXf& matrix, int columnIndex) {
     }
     matrix.conservativeResize(matrix.rows(), matrix.cols() - 1);
 }
+int calculateRank(const MatrixXf& matrix) {
+    // Perform full pivoting QR decomposition
+    FullPivHouseholderQR<MatrixXf> qr(matrix);
+    // Rank is the number of non-zero pivots
+    return qr.rank();
+}
 int main() {
      setValueOfn();
     // Equation Ax = nBx
@@ -59,11 +65,9 @@ int main() {
     ges.compute(A, B);
     MatrixXf eigenvalues = ges.eigenvalues().real();
     MatrixXf eigenvectors = ges.eigenvectors().real();
-
     cout << "Eigenvalues: \n" << eigenvalues << endl;
     cout << "Eigenvectors: \n" << eigenvectors << endl;
 
-    
     MatrixXf EigenVector(n,1);
     MatrixXf temp;
     for(int i=0; i<eigenvectors.cols(); i++){
@@ -73,6 +77,52 @@ int main() {
     }
     deleteColumn(EigenVector , 0);
     cout<<"Normalized Eigen Vector\n"<<EigenVector<<endl;
+    MatrixXf w = B *EigenVector;
+    int T=1; //3 for just check
+    int M=2; //check it
+    vector<MatrixXf> matA;
+    MatrixXf tempMat;
+    for(int i=0; i<M; i++){
+        tempMat.setRandom(n,n);
+        tempMat = tempMat.array().abs(); // Ensure positive values
+        matA.push_back(tempMat);
+    }
+    vector<MatrixXf> matB;
+    for(int i=0; i<M; i++){
+        tempMat.setRandom(n,n);
+        tempMat = tempMat.array().abs(); // Ensure positive values
+        matB.push_back(tempMat);
+    }
+    MatrixXf Atm = MatrixXf::Zero(n,n);
+    MatrixXf Btm = MatrixXf::Zero(n,n);
+    int colNum;
+    MatrixXf vi , vj;
+    for(int j=0; j<T; j++){
+        for(int i=0; i<n; i++){
+            for(int m=0; m<M; m++){
+                Atm += matA[m];
+                Atm /= m+1;
+                Btm += matB[m];
+                Btm /= m+1;
+                colNum = rand()%EigenVector.cols();
+                vi = EigenVector.col(colNum);
+                colNum = rand()%EigenVector.cols();
+                vj = EigenVector.col(colNum);
+
+                float result = (vj.transpose() * B * vj)(0, 0);
+                if(result < 0) //to fin nan result
+                    result = result * (-1);
+                float rank = calculateRank(A);
+                float maxi = max(result , rank);
+                float sqrtResult = sqrt(maxi);
+                sqrtResult = 1.0 /sqrtResult;
+                MatrixXf yj;
+                yj = vj / sqrtResult;
+            }
+            cout<<"Atm\n"<<Atm<<endl;
+            cout<<"Btm\n"<<Btm<<endl;         
+        }
+    }
 
     return 0;
 }
