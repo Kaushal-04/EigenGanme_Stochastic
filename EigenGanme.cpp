@@ -95,6 +95,9 @@ int main() {
     }
     MatrixXf Atm = MatrixXf::Zero(n,n);
     MatrixXf Btm = MatrixXf::Zero(n,n);
+    MatrixXf rewCala , rewCalaR , rewResl, rewCalb , rewCalbR , rewResR;
+    float rewa , rewb;
+    MatrixXf Reward;
     int colNum;
     MatrixXf vi , vj;
     for(int j=0; j<T; j++){
@@ -118,9 +121,20 @@ int main() {
                 sqrtResult = 1.0 /sqrtResult;
                 MatrixXf yj;
                 yj = vj / sqrtResult;
+                MatrixXf Bvj = (B * vj / maxi);
+                rewCala= vi.transpose() * Btm * vi;
+                rewa=rewCala(0,0);
+                rewCalaR = Atm * vi;
+                rewCalb = vi.transpose() * Atm * vi;
+                rewb=rewCalb(0,0);
+                rewCalbR = Btm * vi;
+                rewResl=rewCalaR * rewa;
+                rewResR=rewCalbR * rewb;
+                Reward = rewResl - rewResR;
+
             }
-            cout<<"Atm\n"<<Atm<<endl;
-            cout<<"Btm\n"<<Btm<<endl;         
+            // cout<<"Atm\n"<<Atm<<endl;
+            // cout<<"Btm\n"<<Btm<<endl;         
         }
     }
 
