@@ -42,11 +42,12 @@ void deleteColumn(MatrixXf& matrix, int columnIndex) {
     }
     matrix.conservativeResize(matrix.rows(), matrix.cols() - 1);
 }
-int calculateRank(const MatrixXf& matrix) {
-    // Perform full pivoting QR decomposition
-    FullPivHouseholderQR<MatrixXf> qr(matrix);
-    // Rank is the number of non-zero pivots
-    return qr.rank();
+float calculateSigma(const MatrixXf& matrix) {
+    EigenSolver<MatrixXf> eigenValueSolver(matrix);
+    MatrixXf eigValmatrix = (eigenValueSolver.eigenvalues()).real();
+    float maxAbsValue = eigValmatrix.cwiseAbs().maxCoeff();
+    return 1 / maxAbsValue;
+
 }
 int main() {
      setValueOfn();
@@ -115,23 +116,44 @@ int main() {
                 float result = (vj.transpose() * B * vj)(0, 0);
                 if(result < 0) //to fin nan result
                     result = result * (-1);
-                float rank = calculateRank(A);
-                float maxi = max(result , rank);
+                float sigma = calculateSigma(B);
+                float maxi = max(result , sigma);
                 float sqrtResult = sqrt(maxi);
                 sqrtResult = 1.0 /sqrtResult;
                 MatrixXf yj;
                 yj = vj / sqrtResult;
-                MatrixXf Bvj = (B * vj / maxi);
+                MatrixXf Byj = (B * vj / maxi);
                 rewCala= vi.transpose() * Btm * vi;
                 rewa=rewCala(0,0);
                 rewCalaR = Atm * vi;
                 rewCalb = vi.transpose() * Atm * vi;
-                rewb=rewCalb(0,0);
+                rewb = rewCalb(0,0);
                 rewCalbR = Btm * vi;
-                rewResl=rewCalaR * rewa;
-                rewResR=rewCalbR * rewb;
+                rewResl = rewCalaR * rewa;
+                rewResR = rewCalbR * rewb;
                 Reward = rewResl - rewResR;
-
+                int tempj = j;
+                while(tempj < i){
+                    MatrixXf PenARes , PenBRes , diffRes;
+                    MatrixXf Penalties(n,1) ;
+                    for(int row=0;  row<n; row++){
+                        Penalties(row , 0) = 0;
+                    }
+                    float PenAScal, PenBScal , PenCScal;
+                    MatrixXf PenA , PenB , PenC , PenVecA , PenVecB;
+                    PenA = vi.transpose() * Atm * yj;
+                    PenAScal=PenA(0,0);
+                    PenB = vi.transpose() * Btm * vi ;
+                    PenBScal = PenB(0,0);
+                    //All Good till
+                    MatrixXf Ba = PenBScal * Byj ;
+                    cout<<"Ba\n"<<Ba<<endl;
+                    //PenC = (vi.transpose() * Byj) * Btm * vi;
+                    //PenCScal = PenC(0,0);
+                    //diffRes = Ba - PenC;
+                    //Penalties = Penalties + (PenAScal * diffRes);
+                    tempj++;
+                }
             }
             // cout<<"Atm\n"<<Atm<<endl;
             // cout<<"Btm\n"<<Btm<<endl;         
