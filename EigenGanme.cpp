@@ -78,7 +78,7 @@ int main() {
     }
     deleteColumn(EigenVector , 0);
     cout<<"Normalized Eigen Vector\n"<<EigenVector<<endl;
-    MatrixXf w = B *EigenVector;
+    MatrixXf w = B * EigenVector;
     int T=1; //3 for just check
     int M=2; //check it
     vector<MatrixXf> matA;
@@ -103,6 +103,7 @@ int main() {
     MatrixXf vi , vj;
     for(int j=0; j<T; j++){
         for(int i=0; i<n; i++){
+            MatrixXf Deltaim , DeltaBvim;
             for(int m=0; m<M; m++){
                 Atm += matA[m];
                 Atm /= m+1;
@@ -123,7 +124,6 @@ int main() {
                 MatrixXf yj;
                 yj = vj * sqrtResult;
                 MatrixXf Byj = (B * vj )* sqrtResult;
-                cout<<"BYj\n"<<Byj<<endl;
                 //Calculate Reward
                 rewCala= vi.transpose() * Btm * vi;
                 rewa=rewCala(0,0);
@@ -154,6 +154,11 @@ int main() {
                     Penalties = Penalties + (PenA * diffRes);
                     tempj++;
                 }
+                Deltaim = Reward - Penalties;
+                DeltaBvim = (Btm * vi);
+                int randomCol = rand()%w.cols();
+                MatrixXf tempi = w.col(randomCol);
+                DeltaBvim -= tempi;
             }       
         }
     }
