@@ -121,8 +121,10 @@ int main() {
                 float sqrtResult = sqrt(maxi);
                 sqrtResult = 1.0 /sqrtResult;
                 MatrixXf yj;
-                yj = vj / sqrtResult;
-                MatrixXf Byj = (B * vj / maxi);
+                yj = vj * sqrtResult;
+                MatrixXf Byj = (B * vj )* sqrtResult;
+                cout<<"BYj\n"<<Byj<<endl;
+                //Calculate Reward
                 rewCala= vi.transpose() * Btm * vi;
                 rewa=rewCala(0,0);
                 rewCalaR = Atm * vi;
@@ -132,31 +134,27 @@ int main() {
                 rewResl = rewCalaR * rewa;
                 rewResR = rewCalbR * rewb;
                 Reward = rewResl - rewResR;
+                //Calculate Penalties
                 int tempj = j;
+                MatrixXf Ba , Bb;
+                float BbL;
+                MatrixXf diffRes;
+                MatrixXf Penalties(n,1) ;
+                for(int row=0;  row<n; row++){
+                    Penalties(row , 0) = 0;
+                }
+                float PenA , PenB;
                 while(tempj < i){
-                    MatrixXf PenARes , PenBRes , diffRes;
-                    MatrixXf Penalties(n,1) ;
-                    for(int row=0;  row<n; row++){
-                        Penalties(row , 0) = 0;
-                    }
-                    float PenAScal, PenBScal , PenCScal;
-                    MatrixXf PenA , PenB , PenC , PenVecA , PenVecB;
-                    PenA = vi.transpose() * Atm * yj;
-                    PenAScal=PenA(0,0);
-                    PenB = vi.transpose() * Btm * vi ;
-                    PenBScal = PenB(0,0);
-                    //All Good till
-                    MatrixXf Ba = PenBScal * Byj ;
-                    cout<<"Ba\n"<<Ba<<endl;
-                    //PenC = (vi.transpose() * Byj) * Btm * vi;
-                    //PenCScal = PenC(0,0);
-                    //diffRes = Ba - PenC;
-                    //Penalties = Penalties + (PenAScal * diffRes);
+                    PenA = (vi.transpose() * Atm * yj)(0,0);
+                    PenB = (vi.transpose() * Btm * vi)(0,0) ;
+                    Ba = PenB * Byj ;
+                    BbL = (vi.transpose() * Byj)(0,0);
+                    Bb = (Btm * vi ) * BbL ;
+                    diffRes = Ba - Bb;
+                    Penalties = Penalties + (PenA * diffRes);
                     tempj++;
                 }
-            }
-            // cout<<"Atm\n"<<Atm<<endl;
-            // cout<<"Btm\n"<<Btm<<endl;         
+            }       
         }
     }
 
