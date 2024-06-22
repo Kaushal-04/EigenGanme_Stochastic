@@ -1,6 +1,12 @@
-#include <iostream>
-#include <Eigen/Dense>
-#include <algorithm>
+#include<iostream>
+#include<iterator>
+#include<Eigen/Dense>
+#include<Eigen/Eigenvalues>
+#include<random>
+#include<cmath>
+#include<math.h>
+#include <cstdlib> // For rand() and srand()
+#include <ctime>   // For time()
 using namespace std;
 using namespace Eigen;
 #define MAX_SIZE 10000
@@ -51,7 +57,7 @@ float calculateSigma(const MatrixXf& matrix) {
 }
 int main() {
      setValueOfn();
-    // Equation Ax = nBx
+    MatrixXf finalEigVect(n,1);
     MatrixXf randomMatrixA , randomMatrixB;
     randomMatrixA.setRandom(n,n);
     randomMatrixA = randomMatrixA.array().abs(); // Ensure positive values
@@ -107,6 +113,10 @@ int main() {
             MatrixXf DelAvg(n,1) ;
                 for(int row=0;  row<n; row++){
                     DelAvg(row , 0) = 0;
+                }
+            MatrixXf DelBvAvg(n,1) ;
+                for(int row=0;  row<n; row++){
+                    DelBvAvg(row , 0) = 0;
                 }
             for(int m=0; m<M; m++){
                 Atm += matA[m];
@@ -165,9 +175,17 @@ int main() {
                 DeltaBvim -= tempi;
                 //Average of Deltaim
                 DelAvg += Deltaim;
+                DelBvAvg += DeltaBvim;
             } 
             DelAvg = DelAvg / M;      
+            MatrixXf newVi = vi + (-2 * DelAvg);
+            vi = normalizeVector(newVi);
+            insertColumnMatrix(finalEigVect , vi);
+            DelBvAvg = DelBvAvg / M;
+            w.col(i) = w.col(i) + (-2 * DelBvAvg);
         }
     }
+    deleteColumn(finalEigVect , 0);
+    cout<<"Final Eigen Vector\n"<<finalEigVect<<endl;
     return 0;
 }
