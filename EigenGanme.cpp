@@ -104,6 +104,10 @@ int main() {
     for(int j=0; j<T; j++){
         for(int i=0; i<n; i++){
             MatrixXf Deltaim , DeltaBvim;
+            MatrixXf DelAvg(n,1) ;
+                for(int row=0;  row<n; row++){
+                    DelAvg(row , 0) = 0;
+                }
             for(int m=0; m<M; m++){
                 Atm += matA[m];
                 Atm /= m+1;
@@ -159,9 +163,11 @@ int main() {
                 int randomCol = rand()%w.cols();
                 MatrixXf tempi = w.col(randomCol);
                 DeltaBvim -= tempi;
-            }       
+                //Average of Deltaim
+                DelAvg += Deltaim;
+            } 
+            DelAvg = DelAvg / M;      
         }
     }
-
     return 0;
 }
