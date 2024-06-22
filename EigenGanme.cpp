@@ -55,8 +55,13 @@ float calculateSigma(const MatrixXf& matrix) {
     return 1 / maxAbsValue;
 
 }
+MatrixXf eigenValues(const MatrixXf& eigenvectors) {
+    SelfAdjointEigenSolver<MatrixXf> solver(eigenvectors.transpose() * eigenvectors);
+    return solver.eigenvalues();
+}
 int main() {
-     setValueOfn();
+    setValueOfn();
+    srand(time(0));
     MatrixXf finalEigVect(n,1);
     MatrixXf randomMatrixA , randomMatrixB;
     randomMatrixA.setRandom(n,n);
@@ -68,12 +73,9 @@ int main() {
           // Eigenvalue and Eigenvector Computation: The GeneralizedEigenSolver class in Eigen is used
           // to solve the generalized eigenvalue problem Ax=λBx. The .compute(A, B) method computes the 
           // eigenvalues and eigenvectors.
-    GeneralizedEigenSolver<MatrixXf> ges;
-    ges.compute(A, B);
-    MatrixXf eigenvalues = ges.eigenvalues().real();
-    MatrixXf eigenvectors = ges.eigenvectors().real();
-    
-    // compare with matlab & signs are opposite so implement
+    GeneralizedSelfAdjointEigenSolver<MatrixXf> ges(A , B);
+    MatrixXf eigenvalues = ges.eigenvalues();
+    MatrixXf eigenvectors = ges.eigenvectors();
     for (int i = 0; i < eigenvectors.rows(); ++i) {
         for (int j = 0; j < eigenvectors.cols(); ++j) {
             eigenvectors(i, j) *= -1;
@@ -145,7 +147,6 @@ int main() {
                 MatrixXf yj;
                 yj = vj * sqrtResult;
                 MatrixXf Byj = (B * vj )* sqrtResult;
-                
                 //Calculate Reward
                 rewCala= vi.transpose() * Btm * vi;
                 rewa=rewCala(0,0);
@@ -156,7 +157,6 @@ int main() {
                 rewResl = rewCalaR * rewa;
                 rewResR = rewCalbR * rewb;
                 Reward = rewResl - rewResR;
-                
                 //Calculate Penalties
                 int tempj = j;
                 MatrixXf Ba , Bb;
@@ -196,5 +196,7 @@ int main() {
     }
     deleteColumn(finalEigVect , 0);
     cout<<"Final Eigen Vector\n"<<finalEigVect<<endl;
+    MatrixXf EigenValues = eigenValues(finalEigVect);
+    cout<<"Eigen Values Matrix : \n"<<EigenValues<<endl;
     return 0;
 }
