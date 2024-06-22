@@ -72,6 +72,13 @@ int main() {
     ges.compute(A, B);
     MatrixXf eigenvalues = ges.eigenvalues().real();
     MatrixXf eigenvectors = ges.eigenvectors().real();
+    
+    // compare with matlab & signs are opposite so implement
+    for (int i = 0; i < eigenvectors.rows(); ++i) {
+        for (int j = 0; j < eigenvectors.cols(); ++j) {
+            eigenvectors(i, j) *= -1;
+        }
+    }
     cout << "Eigenvalues: \n" << eigenvalues << endl;
     cout << "Eigenvectors: \n" << eigenvectors << endl;
 
@@ -138,6 +145,7 @@ int main() {
                 MatrixXf yj;
                 yj = vj * sqrtResult;
                 MatrixXf Byj = (B * vj )* sqrtResult;
+                
                 //Calculate Reward
                 rewCala= vi.transpose() * Btm * vi;
                 rewa=rewCala(0,0);
@@ -148,6 +156,7 @@ int main() {
                 rewResl = rewCalaR * rewa;
                 rewResR = rewCalbR * rewb;
                 Reward = rewResl - rewResR;
+                
                 //Calculate Penalties
                 int tempj = j;
                 MatrixXf Ba , Bb;
