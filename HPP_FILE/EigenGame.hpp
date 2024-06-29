@@ -13,9 +13,7 @@
 using namespace std;
 using namespace Eigen;
 
-MatrixXf makeSymmetric(const MatrixXf& A) {
-    return 0.5 * (A + A.transpose());
-}
+
 MatrixXf normalizeVector(const MatrixXf& vect) {
     MatrixXf normalizedVector = vect;
     float maxElement = vect.cwiseAbs().maxCoeff();
@@ -49,16 +47,10 @@ float calculateSigma(const MatrixXf& matrix) {
     return 1 / maxAbsValue;
 
 }
-MatrixXf eigenValues(const MatrixXf& eigenvectors) {
-    SelfAdjointEigenSolver<MatrixXf> solver(eigenvectors.transpose() * eigenvectors);
-    return solver.eigenvalues();
-}
 
-void solveEigenGame(MatrixXf& Arand , MatrixXf& Brand , int n) {
+MatrixXf solveEigenGame(MatrixXf& A , MatrixXf& B , int n) {
     srand(time(0));
     MatrixXf finalEigVect(n,1);
-    MatrixXf A = makeSymmetric(Arand);
-    MatrixXf B = makeSymmetric(Brand);
           // Eigenvalue and Eigenvector Computation: The GeneralizedEigenSolver class in Eigen is used
           // to solve the generalized eigenvalue problem Ax=λBx. The .compute(A, B) method computes the 
           // eigenvalues and eigenvectors.
@@ -70,9 +62,6 @@ void solveEigenGame(MatrixXf& Arand , MatrixXf& Brand , int n) {
             eigenvectors(i, j) *= -1;
         }
     }
-    // cout << "Eigenvalues: \n" << eigenvalues << endl;
-    // cout << "Eigenvectors: \n" << eigenvectors << endl;
-
     MatrixXf EigenVector(n,1);
     MatrixXf temp;
     for(int i=0; i<eigenvectors.cols(); i++){
@@ -82,11 +71,9 @@ void solveEigenGame(MatrixXf& Arand , MatrixXf& Brand , int n) {
     }
     deleteColumn(EigenVector , 0);
 
-    // cout<<"Normalized Eigen Vector\n"<<EigenVector<<endl;
-
     MatrixXf w = B * EigenVector;
-    int T=1; //3 for just check
-    int M=2; //check it
+    int T=2; //3 for just check
+    int M=5; //check it
     vector<MatrixXf> matA;
     MatrixXf tempMat;
     for(int i=0; i<M; i++){
@@ -186,12 +173,6 @@ void solveEigenGame(MatrixXf& Arand , MatrixXf& Brand , int n) {
         }
     }
     deleteColumn(finalEigVect , 0);
-    cout<<"Final Eigen Vector\n"<<finalEigVect<<endl;
-    MatrixXf EigenValues = eigenValues(finalEigVect);
-    cout<<"Eigen Values Matrix : \n"<<EigenValues<<endl;
+    return finalEigVect;
 }
-
-
-
-
 #endif // EIGENGAME_HPP
